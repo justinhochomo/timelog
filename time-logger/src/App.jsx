@@ -129,51 +129,113 @@ function App() {
   }
 
   return (
-  <div>
-    <button onClick={() => downloadCSV()}>download</button>
-    
-    {logs.map((log) => (
-      <div key={log.id}>
-        <span><b>Start:</b> {convertDateTime(log.startTime)} </span>
-        <span><b>End: </b> {convertDateTime(log.endTime)} </span>
-        <span><b>Activity: </b> {log.activity} </span>
-        <button onClick={() => removeTimelog(log.id)}>Delete</button>
-      </div>
-    ))}
-    
+    <main className="app-shell">
+      <section className="hero-panel">
+        <div className="hero-copy">
+          <p className="eyebrow">Personal Time Log</p>
+          <h1>Browser-based time logging that stays on your device.</h1>
+          <p className="hero-text">
+            Track sessions, note activity, rate energy, and export your history as CSV. Your logs are stored locally in your browser.
+          </p>
+        </div>
+        <div className="hero-actions">
+          <button className="secondary-button" onClick={downloadCSV}>Download CSV</button>
+          <span className="log-count">{logs.length} saved {logs.length === 1 ? "log" : "logs"}</span>
+        </div>
+      </section>
 
-    <button onClick={startLog} disabled={status !== "idle"}>Start Log</button>
-    {status === "started" && <h1>Started at: {new Date(timeLog.startTime).toLocaleString()}</h1>}
-    {status === "started" && (
-      <>
-      <label htmlFor="activity">What activity are you doing?</label>
-      <input id="activity" type="text" value={timeLog.activity} onChange={activityLog}/>
-      <h1>Activity: {timeLog.activity}</h1>
+      <section className="session-panel">
+        <div className="section-heading">
+          <p className="section-label">Current Session</p>
+          <h2>{status === "idle" ? "Ready to begin" : status === "started" ? "Session in progress" : "Session complete"}</h2>
+        </div>
 
-      <select value={timeLog.energyLevel} onChange={handleEnergyLevel}>
-        <option value={0}>Select an Energy level</option>
-        <option value={1}>1</option>
-        <option value={2}>2</option>
-        <option value={3}>3</option>
-        <option value={4}>4</option>
-        <option value={5}>5</option>
-        <option value={6}>6</option>
-        <option value={7}>7</option>
-        <option value={8}>8</option>
-        <option value={9}>9</option>
-        <option value={10}>10</option>
-      </select>
-      </>
-    )}
-    <button onClick={endLog} disabled={status !== "started"} >End Log</button>
-    {status === "ended" && timeLog.endTime && <h1>Ended at: {new Date(timeLog.endTime).toLocaleString()}</h1>}
+        <div className="button-row">
+          <button className="primary-button" onClick={startLog} disabled={status !== "idle"}>Start Log</button>
+          <button className="primary-button" onClick={endLog} disabled={status !== "started"}>End Log</button>
+          <button className="secondary-button" onClick={resetLog} disabled={status !== "ended"}>Reset</button>
+        </div>
 
-    <button onClick={resetLog} disabled={status !== "ended"}>Reset</button>
+        <div className="session-meta">
+          {timeLog.startTime && (
+            <div className="meta-card">
+              <span className="meta-label">Started</span>
+              <span className="meta-value">{convertDateTime(timeLog.startTime)}</span>
+            </div>
+          )}
+          {timeLog.endTime && (
+            <div className="meta-card">
+              <span className="meta-label">Ended</span>
+              <span className="meta-value">{convertDateTime(timeLog.endTime)}</span>
+            </div>
+          )}
+          {timeLog.duration > 0 && (
+            <div className="meta-card">
+              <span className="meta-label">Duration</span>
+              <span className="meta-value">{timeLog.duration.toFixed(2)} hours</span>
+            </div>
+          )}
+        </div>
 
-  
-  </div>
+        {status === "started" && (
+          <div className="form-grid">
+            <label className="field">
+              <span className="field-label">Activity</span>
+              <input id="activity" type="text" value={timeLog.activity} onChange={activityLog} placeholder="Writing, planning, coding..." />
+            </label>
 
+            <label className="field">
+              <span className="field-label">Energy Level</span>
+              <select value={timeLog.energyLevel} onChange={handleEnergyLevel}>
+                <option value={0}>Select an energy level</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+                <option value={5}>5</option>
+                <option value={6}>6</option>
+                <option value={7}>7</option>
+                <option value={8}>8</option>
+                <option value={9}>9</option>
+                <option value={10}>10</option>
+              </select>
+            </label>
+          </div>
+        )}
+      </section>
 
+      <section className="logs-panel">
+        <div className="section-heading">
+          <p className="section-label">Saved Logs</p>
+          <h2>Session history</h2>
+        </div>
+
+        {logs.length === 0 ? (
+          <div className="empty-state">No saved logs yet. Finish one session and it will appear here.</div>
+        ) : (
+          <div className="logs-list">
+            {logs.map((log) => (
+              <article className="log-card" key={log.id}>
+                <div className="log-card-header">
+                  <div>
+                    <p className="log-activity">{log.activity || "Untitled activity"}</p>
+                    <p className="log-id">ID: {log.id}</p>
+                  </div>
+                  <button className="danger-button" onClick={() => removeTimelog(log.id)}>Delete</button>
+                </div>
+
+                <div className="log-details">
+                  <span><strong>Start:</strong> {convertDateTime(log.startTime)}</span>
+                  <span><strong>End:</strong> {convertDateTime(log.endTime)}</span>
+                  <span><strong>Duration:</strong> {log.duration.toFixed(2)} hours</span>
+                  <span><strong>Energy:</strong> {log.energyLevel}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
   )
 }
 
